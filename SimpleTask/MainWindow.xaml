@@ -5,15 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleTask"
         mc:Ignorable="d"
-        Title="Работа с асинхронными методами" Height="459.375" Width="800" SizeToContent="WidthAndHeight">
+        Title="Работа с асинхронными методами" Height="462.964" Width="800" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="97*"/>
             <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="163*"/>
         </Grid.ColumnDefinitions>
-        <TextBox HorizontalAlignment="Left" Height="362" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="767" Name="textBox" ScrollViewer.VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="3" Grid.IsSharedSizeScope="True"/>
+        <TextBox HorizontalAlignment="Left" Height="362" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="767" Name="textBox" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.ColumnSpan="3" Grid.IsSharedSizeScope="True"/>
         <Button Content="Очистить" HorizontalAlignment="Left" Margin="10,387,0,0" VerticalAlignment="Top" Width="103" Height="22" Click="ButtonForClear_Click"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="144,387,0,0" VerticalAlignment="Top" Width="87" Height="22" Click="Button_Click"/>
 
     </Grid>
 </Window>

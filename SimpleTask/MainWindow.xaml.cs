@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,10 +22,12 @@ namespace SimpleTask
     /// </summary>
     public partial class MainWindow : Window
     {
+        TextBox t = new TextBox();
+
         public MainWindow()
         {
             InitializeComponent();
-        }
+        } 
        
         /// <summary>
         /// Кнопка очистки окна TextBox
@@ -37,19 +40,27 @@ namespace SimpleTask
         }
 
         /// <summary>
-        /// Обработчик события на изменение текста в TextBox
+        /// Асинхронный метод поиска подстроки в поле текста TextBox
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        /// <param name="str1">Текущая строка из TextBox</param>
+        /// <param name="str2">Стравниваемая подстрока</param>
+        private async void FoundStringAsync()
         {
-            // массив char для хранения содержимого TextBox
-            char[] bufferChars = new char[textBox.Text.Length];
+            await Task.Run(() => FoundString());   
+        }
+
+
+        private async void FoundString()
+        {
+            /*// массив char для хранения содержимого TextBox
+            //char[] bufferChars = new char[t.Text.Length];
+            int lenghtTextIsTextBox = await t.Text.Length;
+            char[] bufferChars = new char[lenghtTextIsTextBox];            
             // стрим для чтения потока char из TextBox
-            using (StringReader reader = new StringReader(textBox.Text))
+            using (StringReader reader = new StringReader(t.Text))
             {
                 // асинхронное чтение
-                await reader.ReadAsync(bufferChars, 0, textBox.Text.Length);
+                await reader.ReadAsync(bufferChars, 0, t.Text.Length);
             }
 
             // контейнер для записи результата
@@ -73,9 +84,77 @@ namespace SimpleTask
                         await writer.WriteAsync(c);
                     }
                 }
+                
                 // запись результата в TextBox
-                textBox.Text = sb.ToString();
+                t.Text = sb.ToString();
+            }*/
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            t = Clone<TextBox>(textBox);        
+            char[] bufferChars = new char[t.Text.Length];
+            // стрим для чтения потока char из TextBox
+            using (StringReader reader = new StringReader(t.Text))
+            {
+                // асинхронное чтение
+                await reader.ReadAsync(bufferChars, 0, t.Text.Length);
             }
+
+            // контейнер для записи результата
+            StringBuilder sb = new StringBuilder();
+            // стрим для записи потока string
+            using (StringWriter writer = new StringWriter(sb))
+            {
+                foreach (char c in bufferChars)
+                {
+                    // если символ - это пробел
+                    if (c == ' ')
+                    {
+                        // записываем вместо пробела перенос строки 
+                        //await writer.WriteLineAsync();
+                        // возвращаем каретку
+                        await writer.WriteAsync("\r\n");
+                    }
+                    else
+                    {
+                        // 
+                        await writer.WriteAsync(c);
+                    }
+                }
+
+                // запись результата в TextBox
+                t.Text = sb.ToString();
+            }
+            await Task.Run(() => { textBox = Clone<TextBox>(t); });
+            //Task.Run(textBox = Clone<TextBox>(t));
+        }
+
+        /// <summary>
+        /// Обобщенный метод клонирования объектов Contol
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static T Clone<T>(T t)
+        {
+            // создание экземпляра textbox на этапе выполнения (позднее связывание)
+            T instance = Activator.CreateInstance<T>();
+            Type control = t.GetType();
+            PropertyInfo[] info = control.GetProperties();
+
+            foreach(PropertyInfo pi in info)
+            {
+                if((pi.CanWrite) && !(pi.Name == "WindowTarget") && !(pi.Name == "Capture"))
+                { 
+                    pi.SetValue(instance, pi.GetValue(t, null));
+                    //MessageBox.Show(String.Format($"Name = {pi.Name}\nValue = {pi.GetValue(t, null)}"));
+                }
+            }
+            return instance;
         }
     }
 }
+
+
+// использовать копирование объекта, извлечь состояние объекта, изменить и заменить в основной поток
